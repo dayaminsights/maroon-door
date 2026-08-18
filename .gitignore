@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+*.log
+.backup/
+
+# scratch / debug output, not real site content
+.menu_extract_debug.txt
+shot_*.png
+UsersUSER*

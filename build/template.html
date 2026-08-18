@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maroon Door</title>
+<style>
+/*__FONTS__*/
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  --maroon:#5C0B0B; --oxblood:#7A1414; --brass:#A9814A; --warmlight:#E9D6C9;
+  --ivory:#F2E7E2; --ivory2:#E8D3CA; --ink:#2A140F; --line:rgba(92,11,11,.16);
+  --wa:#25D366; --wa-dark:#128C4A;
+  background:var(--ivory); color:var(--ink);
+  font-family:'Manrope',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px; line-height:1.6; -webkit-text-size-adjust:100%;
+}
+img,svg{display:block;max-width:100%}
+button{font:inherit;border:none;background:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+.display{font-family:'Fraunces',ui-serif,Georgia,serif}
+.italic{font-style:italic}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.wrap{max-width:1180px;margin-inline:auto;padding-inline:clamp(20px,5vw,56px)}
+.eyebrow{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* reveal-on-scroll */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);transition-delay:calc(var(--i,0) * 80ms)}
+.reveal.in-view{opacity:1;transform:translateY(0)}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* photo duotone frame */
+.photo-frame{position:relative;overflow:hidden;background:var(--ink)}
+.photo-frame img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.1) brightness(1.05);transition:transform .6s cubic-bezier(.16,1,.3,1);display:block}
+.photo-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(155deg,rgba(92,11,11,.6),rgba(122,20,20,.32) 55%,rgba(169,129,74,.14));mix-blend-mode:multiply;pointer-events:none}
+.photo-frame:hover img{transform:scale(1.06)}
+@media (prefers-reduced-motion:reduce){.photo-frame:hover img{transform:none}}
+
+/* door mark */
+.doormark{color:var(--maroon)}
+.doormark .leaf{transform-origin:32px 78px}
+.doormark .leaf-l{animation:leaf-settle-l .9s cubic-bezier(.16,1,.3,1) both}
+.doormark .leaf-r{animation:leaf-settle-r .9s cubic-bezier(.16,1,.3,1) both}
+@keyframes leaf-settle-l{from{transform:translateX(-7px) rotate(-7deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes leaf-settle-r{from{transform:translateX(7px) rotate(7deg);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.doormark .leaf{animation:none}}
+
+/* ===== door intro ===== */
+.door-intro{position:fixed;inset:0;z-index:3000;display:flex;background:var(--ink);cursor:pointer;animation:door-intro-off 1ms 2800ms forwards}
+.door-intro__leaf{position:relative;width:50%;height:100%;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.door-intro__leaf-img{position:absolute;inset:0;width:200%;height:100%;background-size:200% 100%;filter:grayscale(1) contrast(1.12) brightness(.58)}
+.door-intro__leaf--l{animation:door-open-l 1.15s .65s cubic-bezier(.76,0,.24,1) both}
+.door-intro__leaf--r{animation:door-open-r 1.15s .65s cubic-bezier(.76,0,.24,1) both}
+.door-intro__leaf--l .door-intro__leaf-img{left:0;background-position:left center;border-right:2px solid var(--brass)}
+.door-intro__leaf--r .door-intro__leaf-img{right:0;background-position:right center;border-left:2px solid var(--brass)}
+.door-intro__ring{position:absolute;top:50%;width:26px;height:26px;margin-top:-13px;border:3px solid var(--brass);border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.door-intro__leaf--l .door-intro__ring{right:26px}
+.door-intro__leaf--r .door-intro__ring{left:26px}
+.door-intro__hint{position:absolute;top:50%;left:50%;translate:-50% -50%;z-index:2;animation:hint-fade .35s .55s forwards}
+.door-intro__hint img{width:120px;height:120px;border-radius:18px;box-shadow:0 14px 34px -12px rgba(0,0,0,.6)}
+@keyframes door-open-l{to{transform:translateX(-100%)}}
+@keyframes door-open-r{to{transform:translateX(100%)}}
+@keyframes door-intro-off{to{visibility:hidden;pointer-events:none}}
+@keyframes hint-fade{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.door-intro{display:none}}
+
+/* ===== header ===== */
+.site-header{position:sticky;top:0;z-index:900;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:20px;padding:14px clamp(20px,5vw,56px);
+  background:
+    radial-gradient(130% 220% at 12% -60%, rgba(109,4,4,.55), transparent 58%),
+    radial-gradient(110% 200% at 88% 220%, rgba(93,10,10,.6), transparent 55%),
+    linear-gradient(135deg,#3D0101 0%,#4A0102 55%,#5E0101 100%);
+  border-bottom:1px solid rgba(169,129,74,.28);transition:box-shadow .25s ease}
+.site-header.is-scrolled{box-shadow:0 10px 26px -16px rgba(20,8,8,.55)}
+.brand{display:flex;align-items:center;justify-self:center}
+.brand img{width:40px;height:40px;border-radius:9px;transition:transform .18s ease;box-shadow:0 4px 14px -6px rgba(0,0,0,.5)}
+.brand:hover img{transform:scale(1.06)}
+.site-nav__links{justify-self:start;display:flex;gap:clamp(14px,2.6vw,28px);font-size:.86rem;font-weight:600}
+.site-nav__links a{color:var(--ivory2);padding-bottom:3px;border-bottom:1px solid transparent;transition:border-color .2s ease,color .2s ease}
+.site-nav__links a:hover{border-color:var(--brass);color:var(--warmlight)}
+.header-cta{justify-self:end}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;font-weight:700;font-size:.86rem;letter-spacing:.01em;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn svg{width:16px;height:16px;flex:none}
+.btn--wa{background:var(--wa);color:#fff;box-shadow:0 10px 22px -12px rgba(18,140,74,.55)}
+.btn--wa:hover{background:var(--wa-dark)}
+.btn--ghost{border:1.5px solid var(--maroon);color:var(--maroon)}
+.btn--ghost:hover{background:var(--maroon);color:var(--ivory)}
+.header-cta{display:none}
+@media (min-width:640px){.header-cta{display:inline-flex}}
+@media (max-width:767px){.site-nav__links{display:none}}
+
+/* ===== hero ===== */
+.hero{position:relative;min-height:min(92vh,880px);display:flex;align-items:center;justify-content:flex-start;text-align:left;overflow:hidden}
+.hero .photo-frame{position:absolute;inset:0}
+.photo-frame--plain img{filter:none}
+.hero .photo-frame--plain::after{mix-blend-mode:normal;background:linear-gradient(100deg,rgba(20,8,6,.8) 0%,rgba(20,8,6,.55) 30%,rgba(20,8,6,.2) 52%,transparent 66%)}
+.hero-content{position:relative;z-index:2;color:var(--ivory);padding:0 clamp(20px,5vw,56px);max-width:640px}
+.hero-content .eyebrow{color:var(--warmlight);margin-bottom:16px}
+.hero-content h1{font-size:clamp(2.3rem,5.4vw,4rem);line-height:1.06;font-weight:600;text-wrap:balance}
+.hero-content h1 em{color:var(--warmlight);font-style:italic}
+.hero-content p{margin:22px 0 0;max-width:44ch;font-size:1.06rem;line-height:1.65;color:#EAD9CE}
+.hero-ctas{display:flex;gap:14px;justify-content:flex-start;flex-wrap:wrap;margin-top:34px}
+.scroll-cue{position:absolute;bottom:22px;left:50%;translate:-50% 0;z-index:2;color:var(--warmlight);opacity:.8;animation:cue-bob 2.4s ease-in-out infinite}
+@keyframes cue-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.scroll-cue{animation:none}}
+
+section{padding:clamp(56px,8vw,96px) 0}
+.sechead{text-align:center;max-width:46ch;margin:0 auto 48px}
+.sechead .eyebrow{color:var(--oxblood)}
+.sechead h2{font-family:'Fraunces';font-weight:600;font-size:clamp(1.8rem,3.2vw,2.5rem);margin-top:10px;text-wrap:balance}
+
+/* ===== offers ===== */
+.offers{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px}
+.offer-card{background:var(--ivory2);border-radius:22px;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s ease}
+.offer-card:hover{transform:translateY(-6px);box-shadow:0 26px 44px -26px rgba(92,11,11,.35)}
+.offer-card .photo-frame{aspect-ratio:4/3}
+.offer-card__illustrated{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,rgba(169,129,74,.22),transparent 60%),var(--maroon);position:relative}
+.offer-card__illustrated .doormark{width:56px;height:70px;color:var(--warmlight)}
+.offer-card__illustrated::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(169,129,74,.18) 1px,transparent 1.6px);background-size:14px 14px}
+.offer-card__body{padding:26px 24px 28px;display:flex;flex-direction:column;gap:10px;flex:1}
+.offer-card h3{font-family:'Fraunces';font-style:italic;font-weight:600;font-size:1.32rem;color:var(--maroon)}
+.offer-card p{font-size:.94rem;line-height:1.62;color:#4B3E36;flex:1}
+.offer-card .card-cta{align-self:flex-start;margin-top:6px;display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--wa-dark);border-bottom:1px solid var(--wa);padding-bottom:2px}
+.card-cta svg{width:14px;height:14px;flex:none}
+.offer-card .card-cta:hover{color:var(--maroon);border-color:var(--maroon)}
+
+/* ===== bowl story (scroll-linked ingredient reveal) ===== */
+@property --p{syntax:'<number>';inherits:true;initial-value:0}
+.bowl-wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:8px}
+/* Auto-height sticky box (NOT height:100vh) — a 100vh box was tried and
+   reverted: once the containing block ran out and the box released, that
+   100vh box kept its full height in normal flow, so its old centering
+   padding-top sat there as dead blank space with the heading+bowl reappearing
+   well below it — the "Grilled Chicken scrolls up and leaves an empty gap"
+   bug. An auto-height box has no such padding to strand: once released it's
+   just its own content height, so it hands off to the outro CTA immediately
+   behind it, no gap.
+   `top` targets the *bowl visual's own center* landing where a step's heading
+   actually sits the instant it first becomes active (~75vh empirically — the
+   IntersectionObserver's -45%/-45% rootMargin fires while a heading is still
+   low in the viewport, not at dead-center). Using 72vh, not exactly 75vh,
+   because the outer min() is a hard safety floor: without it this box
+   (~500px tall) would clip its own caption on short viewports, same as the
+   original "bowl cut off at the bottom" bug. The inner max(24px, …) is
+   separate — just header clearance so top never goes negative. */
+.bowl-stage-col{position:sticky;top:min(max(24px,calc(72svh - 295px)),calc(100svh - 520px));display:flex;flex-direction:column;align-items:center;gap:14px}
+/* Heading lives inside the pinned column so it never scrolls away — the whole
+   block (heading + bowl + caption) must fit one viewport together, so it's
+   sized smaller than a standalone .sechead / hero visual would be. */
+.bowl-stage-col .sechead{margin-bottom:0}
+.bowl-stage-col .sechead h2{font-size:clamp(1.4rem,2.4vw,2rem)}
+.bowl-visual{position:relative;width:min(42vw,300px);aspect-ratio:1/1}
+.bowl-visual__base{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 36% 30%,#fff,var(--ivory2) 68%,#d9c4ba 100%);box-shadow:0 34px 60px -28px rgba(92,11,11,.45),inset 0 0 0 10px rgba(255,255,255,.55)}
+.bowl-visual__photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;filter:saturate(1.08) contrast(1.04);--p:0;mask-image:conic-gradient(from -60deg at 50% 50%,#000 calc(var(--p) * 1turn),transparent 0);-webkit-mask-image:conic-gradient(from -60deg at 50% 50%,#000 calc(var(--p) * 1turn),transparent 0);transition:--p .85s cubic-bezier(.16,1,.3,1)}
+.bowl-visual__cap{font-size:.78rem;letter-spacing:.02em;color:#8f6f64;font-style:italic;text-align:center;max-width:26ch}
+/* Trailing cushion equal to the visual's own max height: without it, position:sticky
+   runs out of containing-block room during the LAST step and the bowl scrolls away
+   before its final wedge (Grilled Chicken, data-p:1) is ever seen — confirmed by
+   measuring .bowl-stage-col's rect across the scroll range, not assumed. */
+/* Leading buffer: a position:sticky box this tall doesn't lock into its final
+   (centered) spot until a full viewport-height of scroll has passed — without
+   this, step 1 finishes its whole activation window while the bowl is still
+   sliding into place, so "Cherry Tomatoes" is long gone by the time the circle
+   settles. 40vh pushes step 1's trigger to land after the bowl has settled —
+   confirmed by tracing bowl-center vs. active-step-h3-center across scroll. */
+.bowl-steps{display:flex;flex-direction:column;list-style:none;margin-top:40vh;padding-bottom:max(60vh,440px)}
+.bowl-step{min-height:42vh;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:22px 0 22px 26px;border-left:2px solid var(--line);opacity:.4;transform:translateX(-6px);transition:opacity .6s ease,transform .5s ease,border-color .5s ease}
+.bowl-step__no{font-family:'Fraunces';font-style:italic;font-size:.85rem;color:var(--brass)}
+.bowl-step h3{font-family:'Fraunces';font-weight:600;font-size:1.4rem;color:var(--maroon);margin-top:2px}
+.bowl-step p{font-size:.94rem;line-height:1.6;color:#4B3E36;max-width:36ch}
+.bowl-step.is-active{opacity:1;transform:translateX(0);border-color:var(--oxblood)}
+/* Directional: steps already scrolled past fade away rather than sitting at the
+   same dim level as steps still to come — reinforces scroll direction. */
+.bowl-step.is-past{opacity:.1;transform:translateX(-6px)}
+.bowl-outro{text-align:center;margin-top:40px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.bowl-outro p{font-family:'Fraunces';font-style:italic;font-size:1.3rem;color:var(--maroon)}
+
+/* horizontal food gallery — bleeds to the section's own edge (not the
+   viewport) so it lines up with everything else in .wrap, via a negative
+   margin matched to the wrap's own padding. */
+.bowl-gallery{margin-top:48px}
+.bowl-gallery__label{font-size:.78rem;letter-spacing:.02em;color:#8f6f64;font-style:italic;margin-bottom:14px}
+.bowl-gallery__track{display:flex;gap:16px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px clamp(20px,5vw,56px) 20px;margin-inline:calc(-1 * clamp(20px,5vw,56px));scrollbar-width:none}
+.bowl-gallery__track::-webkit-scrollbar{display:none}
+.bowl-gallery__item{flex:0 0 clamp(140px,32vw,190px);scroll-snap-align:start}
+.bowl-gallery__photo{aspect-ratio:4/5;border-radius:18px;background:linear-gradient(155deg,var(--ivory2),#d9c4ba);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 30px -20px rgba(92,11,11,.35);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.bowl-gallery__photo svg{width:30%;height:30%;color:var(--brass);opacity:.6}
+.bowl-gallery__item:hover .bowl-gallery__photo{transform:translateY(-4px)}
+.bowl-gallery__item p{margin-top:10px;font-size:.82rem;font-weight:700;color:var(--maroon);text-align:center}
+@media (prefers-reduced-motion:reduce){.bowl-gallery__photo{transition:none}}
+@media (max-width:760px){
+  /* Pinned wedge-reveal needs two columns to avoid the image and text
+     fighting for the same vertical space — below that width, show the
+     finished bowl once (unmasked, non-sticky) and drop the per-step dim/highlight. */
+  .bowl-wrap{grid-template-columns:1fr;gap:24px}
+  .bowl-stage-col{position:static}
+  .bowl-visual{width:min(58vw,260px)}
+  .bowl-visual__photo{mask-image:none;-webkit-mask-image:none}
+  .bowl-steps{margin-top:0;padding-bottom:0}
+  .bowl-step,.bowl-step.is-past{min-height:0;padding:14px 0 14px 20px;opacity:1;transform:none}
+  .bowl-step.is-active{border-color:var(--line)}
+}
+@media (prefers-reduced-motion:reduce){
+  .bowl-stage-col{position:static}
+  .bowl-visual__photo{transition:none}
+  .bowl-step,.bowl-step.is-past{opacity:1;transform:none;transition:none}
+  .bowl-steps{margin-top:0;padding-bottom:0}
+}
+
+/* ===== menu ===== */
+.menu-section{background:var(--maroon);color:var(--ivory);border-radius:32px;margin-inline:clamp(12px,3vw,32px);width:auto}
+.menu-section .sechead .eyebrow{color:var(--brass)}
+.menu-section .sechead h2{color:var(--ivory)}
+.dishes{display:flex;gap:30px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px clamp(20px,5vw,56px) 20px;margin-inline:calc(-1 * clamp(20px,5vw,56px))}
+.dishes{scrollbar-width:none}
+.dishes::-webkit-scrollbar{display:none}
+.dish{flex:0 0 clamp(220px,24vw,272px);scroll-snap-align:start;text-align:center;display:flex;flex-direction:column}
+.dish .photo-frame{width:148px;height:148px;margin:0 auto 20px;border-radius:50%;box-shadow:0 0 0 5px rgba(242,231,226,.14),0 20px 34px -16px rgba(0,0,0,.55)}
+/* Real dish color, not the sitewide duotone — food needs to read as appetizing here, same exception as the ingredient-bowl section */
+.dish .photo-frame::after{content:none}
+.dish h3{font-family:'Fraunces';font-style:italic;font-size:1.2rem;line-height:1.3;min-height:2.6em;display:flex;align-items:center;justify-content:center}
+.dish p{margin-top:10px;font-size:.88rem;line-height:1.6;color:#E6D2C4;max-width:32ch;margin-inline:auto}
+.dish .card-cta{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding-top:14px;font-size:.76rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--brass);border-bottom:1px solid rgba(169,129,74,.5);padding-bottom:2px;align-self:center}
+.dish .card-cta:hover{color:var(--ivory);border-color:var(--ivory)}
+.menu-cta{display:flex;justify-content:center;margin-top:8px}
+.dishes-carousel{position:relative}
+/* Same gradient as .site-header, so the controls read as part of the same chrome rather than a new UI color */
+.dish-nav{position:absolute;top:82px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(130% 220% at 12% -60%, rgba(109,4,4,.55), transparent 58%),
+    radial-gradient(110% 200% at 88% 220%, rgba(93,10,10,.6), transparent 55%),
+    linear-gradient(135deg,#3D0101 0%,#4A0102 55%,#5E0101 100%);
+  border:1px solid rgba(169,129,74,.4);color:var(--ivory);box-shadow:0 10px 22px -12px rgba(0,0,0,.6);
+  cursor:pointer;transition:transform .18s ease,opacity .18s ease,visibility .18s ease;z-index:5}
+.dish-nav:hover{transform:scale(1.08)}
+.dish-nav svg{width:20px;height:20px}
+.dish-nav--prev{left:-52px}
+.dish-nav--next{right:-52px}
+@media (max-width:760px){.dish-nav{display:none}}
+
+/* ===== coverage ===== */
+.coverage-map{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.emirate{padding:12px 22px;border:1px solid var(--line);border-radius:999px;font-size:.86rem;font-weight:600;color:var(--maroon);display:flex;align-items:center;gap:8px;background:var(--ivory);transition:background .2s ease,transform .2s ease}
+.emirate:hover{background:var(--ivory2);transform:translateY(-2px)}
+.emirate svg{width:8px;height:8px;color:var(--brass)}
+
+/* ===== about ===== */
+.about-wrap{display:grid;grid-template-columns:1fr 1.3fr;gap:48px;align-items:center}
+.about-photo{aspect-ratio:4/5;border-radius:18px;box-shadow:0 30px 50px -30px rgba(92,11,11,.4)}
+.about-photo-cap{margin-top:10px;font-size:.76rem;letter-spacing:.03em;color:#8f6f64;text-align:center;font-style:italic}
+.about-text{position:relative;padding:8px clamp(6px,3vw,28px)}
+.about-text::before,.about-text::after{content:"";position:absolute;width:26px;height:26px;border:2px solid var(--brass)}
+.about-text::before{top:-8px;left:-2px;border-right:none;border-bottom:none}
+.about-text::after{bottom:-8px;right:-2px;border-left:none;border-top:none}
+.about-text blockquote{font-family:'Fraunces';font-style:italic;font-weight:600;font-size:clamp(1.4rem,2.6vw,2rem);line-height:1.42;color:var(--maroon);text-wrap:balance}
+.about-text cite{display:block;margin-top:22px;font-style:normal;font-size:.86rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--oxblood)}
+@media (max-width:760px){.about-wrap{grid-template-columns:1fr}.about-photo{max-width:280px;margin-inline:auto}}
+
+/* ===== footer ===== */
+footer{background:var(--ink);color:#D9C4BA;border-radius:32px 32px 0 0;margin-inline:clamp(12px,3vw,32px);padding:56px clamp(20px,5vw,56px) 26px}
+.footer-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px;padding-bottom:36px;border-bottom:1px solid rgba(216,203,184,.16)}
+.footer-brand img{width:52px;height:52px;border-radius:12px}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:36px;padding:36px 0;border-bottom:1px solid rgba(216,203,184,.16)}
+.footer-grid h4{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);margin-bottom:16px}
+.footer-grid p,.footer-grid a{display:block;font-size:.88rem;line-height:2;color:#D9C4BA}
+.footer-grid a:hover{color:var(--brass)}
+.footer-bottom{padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.78rem;color:#A6897D}
+
+/* ===== mobile sticky action bar ===== */
+.mobile-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:950;background:var(--ink);border-top:1px solid rgba(201,162,75,.25);padding:8px clamp(10px,3vw,20px);padding-bottom:max(8px,env(safe-area-inset-bottom));gap:8px}
+.mobile-bar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:12px;font-size:.68rem;font-weight:700;letter-spacing:.02em;color:#D9C4BA;min-height:44px;justify-content:center}
+.mobile-bar a svg{width:20px;height:20px}
+.mobile-bar a.mb-wa{color:var(--wa)}
+.mobile-bar a:active{background:rgba(169,129,74,.12)}
+@media (max-width:767px){.mobile-bar{display:flex}body{padding-bottom:64px}}
+
+@media (max-width:760px){
+  .dishes{gap:26px}
+}
+</style>
+</head>
+<body>
+
+<div class="door-intro" id="door-intro" aria-hidden="true">
+  <div class="door-intro__leaf door-intro__leaf--l">
+    <div class="door-intro__leaf-img" style="background-image:url('__IMG_hero_door__')"></div>
+    <div class="door-intro__ring"></div>
+  </div>
+  <div class="door-intro__leaf door-intro__leaf--r">
+    <div class="door-intro__leaf-img" style="background-image:url('__IMG_hero_door__')"></div>
+    <div class="door-intro__ring"></div>
+  </div>
+  <div class="door-intro__hint">
+    <img src="__IMG_logo__" alt="" width="120" height="120">
+  </div>
+</div>
+
+<header class="site-header" id="site-header">
+  <nav class="site-nav__links" aria-label="Primary">
+    <a href="#top">Home</a><a href="#menu">Dadi's Menu</a><a href="#contact">Contact Us</a>
+  </nav>
+  <a class="brand" href="#top">
+    <img src="__IMG_logo__" alt="Maroon Door — Home" width="40" height="40">
+  </a>
+  <a class="btn btn--wa header-cta" href="https://wa.me/971585896967?text=Hi%20Maroon%20Door%2C%20I%27d%20like%20to%20place%20an%20order" target="_blank" rel="noopener">
+    __ICON_WA__ Order Now
+  </a>
+</header>
+
+<section class="hero" id="top">
+  <div class="photo-frame photo-frame--plain"><img src="__IMG_hero_main__" alt="Beef biryani in an engraved Maroon Door copper pan, beside a branded Corporate Catering box" loading="eager" style="object-position:50% 45%"></div>
+  <div class="hero-content">
+    <p class="eyebrow">Dubai · United Arab Emirates</p>
+    <h1 class="display">Healthy, Fresh, and Made <em>Just for You.</em></h1>
+    <p>From office lunches to private events — chef-crafted meals designed to taste incredible and make you feel amazing.</p>
+    <div class="hero-ctas">
+      <a class="btn btn--wa" href="https://wa.me/971585896967?text=Hi%20Maroon%20Door%2C%20I%27d%20like%20to%20place%20an%20order" target="_blank" rel="noopener">__ICON_WA__ Order on WhatsApp</a>
+      <a class="btn btn--ghost" style="color:#F2E7E2;border-color:#F2E7E2" href="#menu">View Dadi's Menu</a>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+</section>
+
+<section class="wrap" id="offers">
+  <div class="sechead reveal">
+    <p class="eyebrow">What we serve</p>
+    <h2>There's an Option for Every Occasion</h2>
+  </div>
+  <div class="offers">
+    <div class="offer-card reveal" style="--i:0">
+      <div class="photo-frame"><img src="__IMG_corporate__" alt="Corporate lunch buffet service" loading="lazy" style="object-position:50% 88%"></div>
+      <div class="offer-card__body">
+        <h3>Corporate Catering</h3>
+        <p>From boardrooms to film sets — we keep creativity and productivity alive.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20Corporate%20Catering" target="_blank" rel="noopener">__ICON_WA_SM__ Enquire on WhatsApp</a>
+      </div>
+    </div>
+    <div class="offer-card reveal" style="--i:1">
+      <div class="photo-frame"><img src="__IMG_mealplan__" alt="Healthy meal plan bowl, fresh ingredients" loading="lazy" style="object-position:50% 60%"></div>
+      <div class="offer-card__body">
+        <h3>Meal Plans</h3>
+        <p>Designed by nutrition experts, combining health, taste, and convenience.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20Meal%20Plans" target="_blank" rel="noopener">__ICON_WA_SM__ Enquire on WhatsApp</a>
+      </div>
+    </div>
+    <div class="offer-card reveal" style="--i:2">
+      <div class="offer-card__illustrated">__DOORMARK_CARD__</div>
+      <div class="offer-card__body">
+        <h3>Royal Catering</h3>
+        <p>Curated menus, elegant setups, and impeccable service — for intimate gatherings or grand celebrations.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20Royal%20Catering" target="_blank" rel="noopener">__ICON_WA_SM__ Enquire on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap bowl-story" id="mealplan-bowl">
+  <div class="bowl-wrap">
+    <div class="bowl-stage-col">
+      <div class="sechead reveal">
+        <p class="eyebrow">Fresh, not frozen</p>
+        <h2>Every Bowl, Built Ingredient by Ingredient</h2>
+      </div>
+      <div class="bowl-visual" aria-hidden="true">
+        <div class="bowl-visual__base"></div>
+        <img class="bowl-visual__photo" src="__IMG_bowl__" alt="" loading="lazy">
+      </div>
+      <p class="bowl-visual__cap">One of our nutrition-designed meal plan bowls</p>
+    </div>
+    <ol class="bowl-steps">
+      <li class="bowl-step" data-p="0.2222">
+        <span class="bowl-step__no">01</span>
+        <h3>Cherry Tomatoes</h3>
+        <p>Vine-ripened, halved fresh each morning for natural sweetness.</p>
+      </li>
+      <li class="bowl-step" data-p="0.3750">
+        <span class="bowl-step__no">02</span>
+        <h3>Red Cabbage</h3>
+        <p>Shredded for crunch and a boost of antioxidants.</p>
+      </li>
+      <li class="bowl-step" data-p="0.4861">
+        <span class="bowl-step__no">03</span>
+        <h3>Broccoli</h3>
+        <p>Steamed lightly to keep the bite and the nutrients.</p>
+      </li>
+      <li class="bowl-step" data-p="0.5972">
+        <span class="bowl-step__no">04</span>
+        <h3>Cucumber</h3>
+        <p>Sliced thin for a cool, hydrating finish.</p>
+      </li>
+      <li class="bowl-step" data-p="0.7639">
+        <span class="bowl-step__no">05</span>
+        <h3>Avocado</h3>
+        <p>Fanned by hand — good fats, done right.</p>
+      </li>
+      <li class="bowl-step" data-p="0.8889">
+        <span class="bowl-step__no">06</span>
+        <h3>Quinoa</h3>
+        <p>A slow-release base that keeps you going.</p>
+      </li>
+      <li class="bowl-step" data-p="1">
+        <span class="bowl-step__no">07</span>
+        <h3>Grilled Chicken</h3>
+        <p>Char-grilled lean protein, the finishing layer.</p>
+      </li>
+    </ol>
+  </div>
+  <div class="bowl-gallery reveal">
+    <p class="bowl-gallery__label">A few of what's inside</p>
+    <!-- Placeholders — swap each __photo__ div for a real <img> once photos
+         exist (wire into build.js's photoMap the same way the other __IMG_
+         tokens work; see ARCHITECTURE.md). -->
+    <ul class="bowl-gallery__track" tabindex="0" aria-label="Photos of food included in the meal plans">
+      <li class="bowl-gallery__item">
+        <div class="bowl-gallery__photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg></div>
+        <p>Protein Bowl</p>
+      </li>
+      <li class="bowl-gallery__item">
+        <div class="bowl-gallery__photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg></div>
+        <p>Veggie Bowl</p>
+      </li>
+      <li class="bowl-gallery__item">
+        <div class="bowl-gallery__photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg></div>
+        <p>Grain Bowl</p>
+      </li>
+      <li class="bowl-gallery__item">
+        <div class="bowl-gallery__photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg></div>
+        <p>Green Bowl</p>
+      </li>
+      <li class="bowl-gallery__item">
+        <div class="bowl-gallery__photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg></div>
+        <p>Power Bowl</p>
+      </li>
+      <li class="bowl-gallery__item">
+        <div class="bowl-gallery__photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg></div>
+        <p>Balanced Bowl</p>
+      </li>
+    </ul>
+  </div>
+  <div class="bowl-outro reveal">
+    <p class="display">Same care, every single bowl.</p>
+    <a class="btn btn--wa" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20Meal%20Plans" target="_blank" rel="noopener">__ICON_WA_SM__ Ask About Meal Plans</a>
+  </div>
+</section>
+
+<section class="menu-section" id="menu">
+  <div class="wrap">
+    <div class="sechead reveal">
+      <p class="eyebrow">Dadi's kitchen</p>
+      <h2>Coming Straight From Dadi's Kitchen</h2>
+    </div>
+    <div class="dishes-carousel">
+      <button type="button" class="dish-nav dish-nav--prev" aria-label="Scroll to previous dishes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <ul class="dishes" tabindex="0" aria-label="Signature dishes from Dadi's Menu">
+      <li class="dish reveal" style="--i:0">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_lamb__" alt="Raan Musallam, slow-roasted lamb on jeweled rice" loading="lazy" style="object-position:50% 78%"></div>
+        <h3>Raan Musallam with Jeweled Rice</h3>
+        <p>Slow-roasted whole lamb leg served on fragrant jeweled rice studded with nuts and dry fruits.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Raan%20Musallam%20with%20Jeweled%20Rice" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+      <li class="dish reveal" style="--i:1">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_kebab__" alt="Shami Kebab patties, plated" loading="lazy" style="object-position:82% 40%"></div>
+        <h3>Shami Kebab</h3>
+        <p>Pan-fried patties made from minced meat and lentils, blended with aromatic spices.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Shami%20Kebab" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+      <li class="dish reveal" style="--i:2">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_biryani__" alt="Korma Biryani, layered rice and gravy" loading="lazy" style="object-position:50% 68%"></div>
+        <h3>Korma Biryani</h3>
+        <p>A fusion biryani layered with korma gravy and aromatic rice, offering deep, slow-cooked flavors.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Korma%20Biryani" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+      <li class="dish reveal" style="--i:3">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_butterchicken__" alt="Butter Chicken in a creamy tomato gravy" loading="lazy" style="object-position:50% 45%"></div>
+        <h3>Butter Chicken</h3>
+        <p>Classic tandoori chicken cooked in a velvety tomato-butter gravy, mildly spiced and creamy.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Butter%20Chicken" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+      <li class="dish reveal" style="--i:4">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_seekh__" alt="Seekh Kebab skewers grilling over coal fire" loading="lazy" style="object-position:50% 55%"></div>
+        <h3>Seekh Kebab</h3>
+        <p>Minced meat blended with herbs and spices, skewered and grilled for a juicy, smoky kebab experience.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Seekh%20Kebab" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+      <li class="dish reveal" style="--i:5">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_malaitikka__" alt="Malai Tikka, creamy marinated chicken skewers" loading="lazy" style="object-position:50% 40%"></div>
+        <h3>Malai Tikka</h3>
+        <p>Creamy, melt-in-the-mouth chicken marinated with fresh cream, cheese, and mild spices, grilled to perfection.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Malai%20Tikka" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+      <li class="dish reveal" style="--i:6">
+        <div class="photo-frame photo-frame--plain"><img src="__IMG_dish_nihari__" alt="Nihari, slow-cooked meat stew" loading="lazy" style="object-position:50% 45%"></div>
+        <h3>Nihari</h3>
+        <p>Slow-cooked meat stew simmered overnight in a deeply spiced gravy, known for its rich and hearty taste.</p>
+        <a class="card-cta" href="https://wa.me/971585896967?text=Hi%2C%20I%27d%20like%20to%20order%20the%20Nihari" target="_blank" rel="noopener">__ICON_WA_SM__ Order this</a>
+      </li>
+    </ul>
+      <button type="button" class="dish-nav dish-nav--next" aria-label="Scroll to more dishes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+    <div class="menu-cta reveal">
+      <a class="btn btn--ghost" style="color:#F2E7E2;border-color:#F2E7E2" href="#">Explore Dadi's Full Menu</a>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="coverage">
+  <div class="sechead reveal">
+    <p class="eyebrow">Delivery zones</p>
+    <h2>Serving All Across the UAE — Seven Emirates, One Door Away</h2>
+  </div>
+  <div class="coverage-map reveal">
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Abu Dhabi</span>
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Dubai</span>
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Sharjah</span>
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Ajman</span>
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Umm Al Quwain</span>
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Ras Al Khaimah</span>
+    <span class="emirate"><svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Fujairah</span>
+  </div>
+</section>
+
+<section class="wrap" id="about">
+  <div class="about-wrap">
+    <div class="reveal" style="--i:0">
+      <div class="photo-frame about-photo"><img src="__IMG_ambience__" alt="Saffron threads, hand-sourced for our jeweled rice" loading="lazy" style="object-position:50% 38%"></div>
+      <p class="about-photo-cap">Saffron, hand-sourced for our jeweled rice</p>
+    </div>
+    <div class="about-text reveal" style="--i:1">
+      <blockquote>"We're a brother-sister duo on a mission to make healthy eating effortless across the UAE."</blockquote>
+      <cite>Simak &amp; Nazia — Partners at Maroon Door</cite>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="footer-top">
+    <div class="footer-brand"><img src="__IMG_logo__" alt="Maroon Door" width="52" height="52"></div>
+    <a class="btn btn--wa" href="https://wa.me/971585896967?text=Hi%20Maroon%20Door%2C%20I%27d%20like%20to%20place%20an%20order" target="_blank" rel="noopener">__ICON_WA__ Order on WhatsApp</a>
+  </div>
+  <div class="footer-grid">
+    <div>
+      <h4>Visit</h4>
+      <p>Dubai, United Arab Emirates</p>
+      <p>Mon–Fri: 9 AM–10 PM</p>
+      <p>Sat: 10 AM–11 PM</p>
+      <p>Sun: 10 AM–8 PM</p>
+    </div>
+    <div>
+      <h4>Order</h4>
+      <a href="https://wa.me/971585896967" target="_blank" rel="noopener">WhatsApp +971 58 589 6967</a>
+      <a href="https://wa.me/971564495480" target="_blank" rel="noopener">WhatsApp +971 56 449 5480</a>
+      <a href="tel:+971585896967">Call +971 58 589 6967</a>
+      <a href="https://instagram.com/themaroondoor.ae" target="_blank" rel="noopener">Instagram @themaroondoor.ae</a>
+    </div>
+    <div>
+      <h4>Useful</h4>
+      <a href="#">Privacy Policy</a><a href="#">Cookie Policy</a><a href="#">Terms &amp; Conditions</a><a href="#">Refunds &amp; Cancellation</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Maroon Door LLC</span><span>Heritage Threshold</span></div>
+</footer>
+
+<nav class="mobile-bar" aria-label="Quick actions">
+  <a href="tel:+971585896967">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    Call
+  </a>
+  <a class="mb-wa" href="https://wa.me/971585896967?text=Hi%20Maroon%20Door%2C%20I%27d%20like%20to%20place%20an%20order" target="_blank" rel="noopener">
+    __ICON_WA__
+    WhatsApp
+  </a>
+  <a href="#menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    Menu
+  </a>
+</nav>
+
+<script>
+(function(){
+  var doorIntro = document.getElementById('door-intro');
+  if (doorIntro) {
+    doorIntro.addEventListener('click', function(){
+      doorIntro.style.transition = 'opacity .35s ease';
+      doorIntro.style.opacity = '0';
+      doorIntro.style.pointerEvents = 'none';
+    });
+  }
+
+  var header = document.getElementById('site-header');
+  window.addEventListener('scroll', function(){
+    header.classList.toggle('is-scrolled', window.scrollY > 8);
+  }, { passive: true });
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    items.forEach(function(el){ el.classList.add('in-view'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+    items.forEach(function(el){ io.observe(el); });
+  }
+
+  var dishTrack = document.querySelector('.dishes');
+  var dishPrev = document.querySelector('.dish-nav--prev');
+  var dishNext = document.querySelector('.dish-nav--next');
+  if (dishTrack && dishPrev && dishNext) {
+    var scrollDishes = function(dir){
+      var behavior = reduce ? 'auto' : 'smooth';
+      var cs = getComputedStyle(dishTrack);
+      // scroll-snap settles native rest position at scrollLeft==padding, not 0 —
+      // compare against the track's own padding rather than a bare epsilon.
+      var padStart = parseFloat(cs.paddingLeft) || 0;
+      var padEnd = parseFloat(cs.paddingRight) || 0;
+      var max = dishTrack.scrollWidth - dishTrack.clientWidth;
+      if (dir === 1 && dishTrack.scrollLeft >= max - padEnd - 4) {
+        dishTrack.scrollTo({ left: 0, behavior: behavior });
+        return;
+      }
+      if (dir === -1 && dishTrack.scrollLeft <= padStart + 4) {
+        dishTrack.scrollTo({ left: max, behavior: behavior });
+        return;
+      }
+      var card = dishTrack.querySelector('.dish');
+      var gap = parseFloat(cs.columnGap || cs.gap) || 30;
+      var step = card ? card.getBoundingClientRect().width + gap : dishTrack.clientWidth * 0.8;
+      dishTrack.scrollBy({ left: dir * step, behavior: behavior });
+    };
+    dishPrev.addEventListener('click', function(){ scrollDishes(-1); });
+    dishNext.addEventListener('click', function(){ scrollDishes(1); });
+  }
+
+  var bowlSteps = document.querySelectorAll('.bowl-step');
+  var bowlPhoto = document.querySelector('.bowl-visual__photo');
+  if (bowlSteps.length && bowlPhoto) {
+    if (reduce || !('IntersectionObserver' in window)) {
+      bowlPhoto.style.setProperty('--p', 1);
+      bowlSteps.forEach(function(s){ s.classList.add('is-active'); });
+    } else {
+      var bowlIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) {
+            var activeIndex = Array.prototype.indexOf.call(bowlSteps, entry.target);
+            bowlSteps.forEach(function(s, i){
+              s.classList.remove('is-active', 'is-past');
+              if (i < activeIndex) s.classList.add('is-past');
+            });
+            entry.target.classList.add('is-active');
+            bowlPhoto.style.setProperty('--p', entry.target.dataset.p);
+          }
+        });
+      }, { threshold: 0, rootMargin: '-45% 0px -45% 0px' });
+      bowlSteps.forEach(function(s){ bowlIO.observe(s); });
+    }
+  }
+})();
+</script>
+</body>
+</html>
